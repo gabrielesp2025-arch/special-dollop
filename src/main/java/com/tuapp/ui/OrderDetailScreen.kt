@@ -1,8 +1,5 @@
 package com.tuapp.ui
 
-import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import android.app.Application
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -16,7 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.tuapp.data.*
 import com.tuapp.data.PhotoStage.*
@@ -31,32 +30,7 @@ fun OrderDetailScreen(orderId: String) {
     val repo = remember { FileRepo(app) }
     val id = orderId.toLongOrNull() ?: repo.listOrders().firstOrNull()?.id ?: return
     var order by remember { mutableStateOf(repo.getOrder(id)) }
-// Imagen del vehículo (si existe un drawable con ese nombre)
-val v = order!!.vehicle
 
-// Busca el id del recurso en res/drawable/ basado en marca+modelo+año
-val resId = com.tuapp.data.carImageResId(
-    app,
-    brand = v.brand,
-    model = v.model,
-    year = v.year
-)
-
-if (resId != 0) {
-    // Si existe, se muestra la imagen
-    Image(
-        painter = painterResource(resId),
-        contentDescription = "Imagen ${v.brand} ${v.model} ${v.year ?: ""}",
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(180.dp)
-            .padding(top = 8.dp),
-        contentScale = ContentScale.Fit
-    )
-} else {
-    // Si no existe el drawable, mostramos un texto
-    Text("Sin imagen disponible para ${v.brand} ${v.model} ${v.year ?: ""}")
-}
     // ---------- CÁMARA: preparación ----------
     var pendingPhotoFile by remember { mutableStateOf<File?>(null) }
 
@@ -86,54 +60,87 @@ if (resId != 0) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("OT #$id") }) }
     ) { p ->
-        Column(Modifier.padding(p).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            Modifier
+                .padding(p)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             val o = order ?: return@Column
 
             Text("Cliente: ${o.customer.name}")
             Text("Vehículo: ${o.vehicle.brand} ${o.vehicle.model} (${o.vehicle.plate})")
-// ---------- Selectores: Marca → Modelo → Año ----------
-Divider()
-Text("Selecciona vehículo", style = MaterialTheme.typography.titleMedium)
 
-// 1) MARCA
-BrandDropdown(currentBrand = o.vehicle.brand) { selectedBrand ->
-    // Al cambiar marca, vaciamos modelo/año/motor
-    repo.updateVehicle(id, brand = selectedBrand, model = "", year = null, engineCode = null)
-    order = repo.getOrder(id)
-}
+            // ---------- Selectores: Marca → Modelo → Año ----------
+            Divider()
+            Text("Selecciona vehículo", style = MaterialTheme.typography.titleMedium)
 
-// 2) MODELO (filtrado por marca)
-ModelDropdown(
-    brand = order?.vehicle?.brand,
-    currentModel = order?.vehicle?.model
-) { selectedModel ->
-    // Al cambiar modelo, vaciamos año/motor
-    repo.updateVehicle(id, model = selectedModel, year = null, engineCode = null)
-    order = repo.getOrder(id)
-}
+            // 1) MARCA
+            BrandDropdown(currentBrand = o.vehicle.brand) { selectedBrand ->
+                // Al cambiar marca, vaciamos modelo/año/motor
+                repo.updateVehicle(id, brand = selectedBrand, model = "", year = null, engineCode = null)
+                order = repo.getOrder(id)
+            }
 
-// 3) AÑO (filtrado por marca+modelo)
-YearDropdown(
-    brand = order?.vehicle?.brand,
-    model = order?.vehicle?.model,
-    currentYear = order?.vehicle?.year
-) { selectedYear ->
-    // Al elegir año, buscamos el código de motor y lo guardamos
-    val code = com.tuapp.data.CarCatalog.engineCodeFor(
-        app,
-        brand = order?.vehicle?.brand ?: return@YearDropdown,
-        model = order?.vehicle?.model ?: return@YearDropdown,
-        year = selectedYear
-    )
-    repo.updateVehicle(id, year = selectedYear, engineCode = code)
-    order = repo.getOrder(id)
-}
+            // 2) MODELO (filtrado por marca)
+            ModelDropdown(
+                brand = order?.vehicle?.brand,
+                currentModel = order?.vehicle?.model
+            ) { selectedModel ->
+                // Al cambiar modelo, vaciamos año/motor
+                repo.updateVehicle(id, model = selectedModel, year = null, engineCode = null)
+                order = repo.getOrder(id)
+            }
 
-// Resumen visual de lo seleccionado
-val v = order!!.vehicle
-Text("Seleccionado: ${v.brand} ${v.model} ${v.year ?: ""}  ${v.engineCode?.let { "· Motor: $it" } ?: ""}")
-Divider()
-// ------------------------------------------------------
+            // 3) AÑO (filtrado por marca+modelo)
+            YearDropdown(
+                brand = order?.vehicle?.brand,
+                model = order?.vehicle?.model,
+                currentYear = order?.vehicle?.year
+            ) { selectedYear ->
+                // Al elegir año, buscamos el código de motor y lo guardamos
+                val code = com.tuapp.data.CarCatalog.engineCodeFor(
+                    app,
+                    brand = order?.vehicle?.brand ?: return@YearDropdown,
+                    model = order?.vehicle?.model ?: return@YearDropdown,
+                    year = selectedYear
+                )
+                repo.updateVehicle(id, year = selectedYear, engineCode = code)
+                order = repo.getOrder(id)
+            }
+
+            // Resumen visual de lo seleccionado
+            val v = order!!.vehicle
+            Text(
+                "Seleccionado: ${v.brand} ${v.model} ${v.year ?: ""}  ${
+                    v.engineCode?.let { "· Motor: $it" } ?: ""
+                }"
+            )
+            Divider()
+            // ------------------------------------------------------
+
+            // ---------- Imagen del vehículo (drawable local si existe) ----------
+            val resId = com.tuapp.data.carImageResId(
+                app,
+                brand = v.brand,
+                model = v.model,
+                year = v.year
+            )
+            if (resId != 0) {
+                Image(
+                    painter = painterResource(resId),
+                    contentDescription = "Imagen ${v.brand} ${v.model} ${v.year ?: ""}",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .padding(top = 8.dp),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                Text("Sin imagen disponible para ${v.brand} ${v.model} ${v.year ?: ""}")
+            }
+            // -------------------------------------------------------------------
+
             Divider()
             Text("Fotos", style = MaterialTheme.typography.titleMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
