@@ -58,6 +58,10 @@ fun PriceReferenceScreen(
     }
     var items by remember { mutableStateOf(initial.map { it.copy() }) }
 
+    // IVA editable (por defecto 21%)
+    var ivaText by remember { mutableStateOf("21.0") }
+    val ivaPct = ivaText.toDoubleOrNull()?.coerceAtLeast(0.0) ?: 21.0
+
     fun totals(): Pair<Double, Double> {
         var minT = 0.0
         var maxT = 0.0
@@ -69,6 +73,8 @@ fun PriceReferenceScreen(
         return minT to maxT
     }
     val (minTotal, maxTotal) = totals()
+    val minConIva = minTotal * (1 + ivaPct / 100.0)
+    val maxConIva = maxTotal * (1 + ivaPct / 100.0)
 
     Scaffold(
         topBar = {
@@ -79,13 +85,12 @@ fun PriceReferenceScreen(
                     val selected = items.filter { it.selected }
                     val canCreate = selected.isNotEmpty()
                     TextButton(enabled = canCreate, onClick = {
-                        // Convertir selección a líneas (desc, cantidad, precio medio)
                         val lines = selected.map {
                             val q = max(1, it.qty)
                             val mid = (it.minEUR + it.maxEUR) / 2.0
                             Triple("${it.category} · ${it.name}", q, mid)
                         }
-                        val newId = repo.newOrderFromLines(lines)
+                        val newId = repo.newOrderFromLines(lines, ivaPct) // 👈 guardamos el IVA elegido
                         onCreateFromPrices(newId)
                     }) { Text("Crear OT") }
                 }
@@ -93,57 +98,8 @@ fun PriceReferenceScreen(
         }
     ) { p ->
         Column(Modifier.padding(p).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Precios orientativos (España). Edita rangos y cantidades. Selecciona líneas y pulsa “Crear OT”.")
 
-            // Resumen
+            // Bloque IVA + resumen
             Card {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Seleccionadas: ${items.count { it.selected }} líneas")
-                    Text("Total estimado: €${"%.2f".format(minTotal)} – €${"%.2f".format(maxTotal)}")
-                }
-            }
-
-            // Lista
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(items) { it ->
-                    Card {
-                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("${it.category} · ${it.name}", style = MaterialTheme.typography.titleMedium)
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                OutlinedTextField(
-                                    value = it.minEUR.toString(),
-                                    onValueChange = { v -> it.minEUR = v.toDoubleOrNull() ?: it.minEUR },
-                                    label = { Text("€ mínimo") },
-                                    modifier = Modifier.width(120.dp)
-                                )
-                                OutlinedTextField(
-                                    value = it.maxEUR.toString(),
-                                    onValueChange = { v -> it.maxEUR = v.toDoubleOrNull() ?: it.maxEUR },
-                                    label = { Text("€ máximo") },
-                                    modifier = Modifier.width(120.dp)
-                                )
-                                OutlinedTextField(
-                                    value = it.qty.toString(),
-                                    onValueChange = { v -> it.qty = (v.toIntOrNull() ?: it.qty).coerceAtLeast(1) },
-                                    label = { Text("Cantidad") },
-                                    modifier = Modifier.width(120.dp)
-                                )
-                            }
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                val selected = it.selected
-                                val toggleText = if (selected) "Quitar del presupuesto" else "Añadir al presupuesto"
-                                Button(onClick = {
-                                    it.selected = !selected
-                                    items = items.toList() // Forzar recomposición
-                                }) { Text(toggleText) }
-                                val lineMin = it.minEUR * max(1, it.qty)
-                                val lineMax = it.maxEUR * max(1, it.qty)
-                                Text("Línea: €${"%.2f".format(lineMin)} – €${"%.2f".format(lineMax)}")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row
