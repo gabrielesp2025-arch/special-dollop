@@ -1,12 +1,11 @@
 package com.tuapp.ui
 
-import androidx.compose.material3.*
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavRoot() {
     val nav = rememberNavController()
@@ -19,8 +18,8 @@ fun NavRoot() {
             )
         }
         composable("order/{id}") {
-            // Placeholder sin padding/Modifier/dp
-            OrderDetailScreen_Placeholder(onBack = { nav.popBackStack() })
+            // Placeholder sin padding/dp/Modifier
+            OrderDetailScreen_Min(onBack = { nav.popBackStack() })
         }
         composable("prices") {
             PriceReferenceScreen(
@@ -34,18 +33,7 @@ fun NavRoot() {
     }
 }
 
-/** Placeholder temporal muy simple para que compile. */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun OrderDetailScreen_Placeholder(onBack: () -> Unit) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Detalle de orden") },
-                navigationIcon = { TextButton(onClick = onBack) { Text("Volver") } }
-            )
-        }
-    ) { _ ->
-        Text("Pantalla detalle (placeholder)")
-    }
+private fun OrderDetailScreen_Min(onBack: () -> Unit) {
+    Text("Pantalla detalle (placeholder)")
 }
