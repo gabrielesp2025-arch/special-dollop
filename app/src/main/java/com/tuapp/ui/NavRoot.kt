@@ -1,10 +1,7 @@
 package com.tuapp.ui
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -22,7 +19,7 @@ fun NavRoot() {
             )
         }
         composable("order/{id}") {
-            // Placeholder temporal para compilar
+            // Placeholder temporal SIN padding ni dp
             OrderDetailScreen_Placeholder(onBack = { nav.popBackStack() })
         }
         composable("prices") {
@@ -48,10 +45,7 @@ private fun OrderDetailScreen_Placeholder(onBack: () -> Unit) {
                 navigationIcon = { TextButton(onClick = onBack) { Text("Volver") } }
             )
         }
-    ) { p ->
-        Text(
-            "Pantalla detalle (placeholder). Luego reemplazamos por la versión completa.",
-            modifier = Modifier.padding(p).padding(16.dp)
-        )
+    ) { _ ->
+        Text("Pantalla detalle (placeholder). Luego reemplazamos por la versión completa.")
     }
 }
