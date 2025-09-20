@@ -1,13 +1,16 @@
 <manifest package="com.tuapp" xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Permisos -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
         android:label="Taller"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar">
 
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -18,7 +21,7 @@
         <!-- FileProvider para fotos y PDF -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.tuapp.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
