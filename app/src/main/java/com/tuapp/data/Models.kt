@@ -18,8 +18,9 @@ data class Vehicle(
     val model: String,
     val plate: String,
     val year: Int? = null,
-    val engineCode: String? = null, // 👈 NUEVO: código de motor
-    val vin: String? = null
+    val engineCode: String? = null,
+    val vin: String? = null,
+    val imagePath: String? = null // ← para guardar ruta local de imagen (opcional)
 )
 
 @Serializable
@@ -37,17 +38,17 @@ data class PartItem(
     val description: String,
     val qty: Int,
     val unitPrice: Double,
-    val supplierUrl: String? = null
+    val url: String? = null // ← renombrado para alinear con FileRepo.addPart
 )
 
 @Serializable
-enum class PhotoStage { BEFORE, DURING, AFTER } // 👈 fotos por etapa
+enum class PhotoStage { BEFORE, DURING, AFTER }
 
 @Serializable
 data class PhotoRef(
     val id: Long = 0,
     val stage: PhotoStage,
-    val path: String // ruta interna (app files)
+    val path: String // ruta interna (filesDir)
 )
 
 @Serializable
@@ -59,8 +60,8 @@ data class Order(
     val baseHourlyRate: Double = 35.0,
     val services: List<ServiceItem> = emptyList(),
     val parts: List<PartItem> = emptyList(),
-    val photos: List<PhotoRef> = emptyList(),      // 👈 NUEVO
-    val customerSignaturePath: String? = null      // 👈 NUEVO
+    val photos: List<PhotoRef> = emptyList(),
+    val customerSignaturePath: String? = null
 ) {
     val subtotalServices: Double get() = services.sumOf { it.hours * it.hourlyRate }
     val subtotalParts: Double get() = parts.sumOf { it.qty * it.unitPrice }
