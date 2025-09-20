@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.tuapp.data.*
 import com.tuapp.data.PhotoStage.*
+import com.tuapp.data.carImageResId
 import com.tuapp.util.createImageFile
 import com.tuapp.util.uriForFile
 import java.io.File
@@ -31,35 +32,46 @@ fun OrderDetailScreen(orderId: String) {
     val id = orderId.toLongOrNull() ?: repo.listOrders().firstOrNull()?.id ?: return
     var order by remember { mutableStateOf(repo.getOrder(id)) }
 
-    // ---------- CÁMARA: preparación ----------
+    // ====== LAUNCHERS DE CÁMARA (sin helpers) ======
     var pendingPhotoFile by remember { mutableStateOf<File?>(null) }
 
-    fun cameraLauncherFor(stage: PhotoStage) =
-        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-            if (ok) {
-                pendingPhotoFile?.let { f ->
-                    repo.addPhoto(id, stage, f.absolutePath) // guarda en JSON
-                    order = repo.getOrder(id)                // refresca UI
-                }
+    val takeBefore = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) {
+            pendingPhotoFile?.let { f ->
+                repo.addPhoto(id, BEFORE, f.absolutePath)
+                order = repo.getOrder(id)
             }
-            pendingPhotoFile = null
         }
-
-    val launchBefore = cameraLauncherFor(BEFORE)
-    val launchDuring = cameraLauncherFor(DURING)
-    val launchAfter  = cameraLauncherFor(AFTER)
+        pendingPhotoFile = null
+    }
+    val takeDuring = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) {
+            pendingPhotoFile?.let { f ->
+                repo.addPhoto(id, DURING, f.absolutePath)
+                order = repo.getOrder(id)
+            }
+        }
+        pendingPhotoFile = null
+    }
+    val takeAfter = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) {
+            pendingPhotoFile?.let { f ->
+                repo.addPhoto(id, AFTER, f.absolutePath)
+                order = repo.getOrder(id)
+            }
+        }
+        pendingPhotoFile = null
+    }
 
     fun takePhoto(stage: PhotoStage, launch: (Uri) -> Unit) {
-        val f = createImageFile(app, "OT${id}_${stage.name}") // crea fichero vacío
-        val uri = uriForFile(app, f)                           // genera URI segura
+        val f = createImageFile(app, "OT${id}_${stage.name}")
+        val uri = uriForFile(app, f)
         pendingPhotoFile = f
-        launch(uri) // abre la cámara para guardar en ese fichero
+        launch(uri)
     }
-    // -----------------------------------------
+    // ================================================
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("OT #$id") }) }
-    ) { p ->
+    Scaffold(topBar = { TopAppBar(title = { Text("OT #$id") }) }) { p ->
         Column(
             Modifier
                 .padding(p)
@@ -68,38 +80,52 @@ fun OrderDetailScreen(orderId: String) {
         ) {
             val o = order ?: return@Column
 
+            // Imagen del vehículo (drawable si existe)
+            run {
+                val v = o.vehicle
+                val resId = carImageResId(app, v.brand, v.model, v.year)
+                if (resId != 0) {
+                    Image(
+                        painter = painterResource(resId),
+                        contentDescription = "Imagen ${v.brand} ${v.model} ${v.year ?: ""}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Text("Sin imagen disponible para ${v.brand} ${v.model} ${v.year ?: ""}")
+                }
+            }
+
             Text("Cliente: ${o.customer.name}")
             Text("Vehículo: ${o.vehicle.brand} ${o.vehicle.model} (${o.vehicle.plate})")
 
-            // ---------- Selectores: Marca → Modelo → Año ----------
             Divider()
             Text("Selecciona vehículo", style = MaterialTheme.typography.titleMedium)
 
-            // 1) MARCA
+            // 1) Marca
             BrandDropdown(currentBrand = o.vehicle.brand) { selectedBrand ->
-                // Al cambiar marca, vaciamos modelo/año/motor
                 repo.updateVehicle(id, brand = selectedBrand, model = "", year = null, engineCode = null)
                 order = repo.getOrder(id)
             }
 
-            // 2) MODELO (filtrado por marca)
+            // 2) Modelo (filtrado por marca)
             ModelDropdown(
                 brand = order?.vehicle?.brand,
                 currentModel = order?.vehicle?.model
             ) { selectedModel ->
-                // Al cambiar modelo, vaciamos año/motor
                 repo.updateVehicle(id, model = selectedModel, year = null, engineCode = null)
                 order = repo.getOrder(id)
             }
 
-            // 3) AÑO (filtrado por marca+modelo)
+            // 3) Año (filtrado por marca+modelo)
             YearDropdown(
                 brand = order?.vehicle?.brand,
                 model = order?.vehicle?.model,
                 currentYear = order?.vehicle?.year
             ) { selectedYear ->
-                // Al elegir año, buscamos el código de motor y lo guardamos
-                val code = com.tuapp.data.CarCatalog.engineCodeFor(
+                val code = CarCatalog.engineCodeFor(
                     app,
                     brand = order?.vehicle?.brand ?: return@YearDropdown,
                     model = order?.vehicle?.model ?: return@YearDropdown,
@@ -109,47 +135,20 @@ fun OrderDetailScreen(orderId: String) {
                 order = repo.getOrder(id)
             }
 
-            // Resumen visual de lo seleccionado
-            val v = order!!.vehicle
+            val vSel = order!!.vehicle
             Text(
-                "Seleccionado: ${v.brand} ${v.model} ${v.year ?: ""}  ${
-                    v.engineCode?.let { "· Motor: $it" } ?: ""
-                }"
+                "Seleccionado: ${vSel.brand} ${vSel.model} ${vSel.year ?: ""} " +
+                        (vSel.engineCode?.let { "· Motor: $it" } ?: "")
             )
-            Divider()
-            // ------------------------------------------------------
-
-            // ---------- Imagen del vehículo (drawable local si existe) ----------
-            val resId = com.tuapp.data.carImageResId(
-                app,
-                brand = v.brand,
-                model = v.model,
-                year = v.year
-            )
-            if (resId != 0) {
-                Image(
-                    painter = painterResource(resId),
-                    contentDescription = "Imagen ${v.brand} ${v.model} ${v.year ?: ""}",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .padding(top = 8.dp),
-                    contentScale = ContentScale.Fit
-                )
-            } else {
-                Text("Sin imagen disponible para ${v.brand} ${v.model} ${v.year ?: ""}")
-            }
-            // -------------------------------------------------------------------
 
             Divider()
             Text("Fotos", style = MaterialTheme.typography.titleMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { takePhoto(BEFORE, launchBefore::launch) }) { Text("Antes") }
-                Button(onClick = { takePhoto(DURING, launchDuring::launch) }) { Text("En marcha") }
-                Button(onClick = { takePhoto(AFTER,  launchAfter::launch)  }) { Text("Después") }
+                Button(onClick = { takePhoto(BEFORE, takeBefore::launch) }) { Text("Antes") }
+                Button(onClick = { takePhoto(DURING, takeDuring::launch) }) { Text("En marcha") }
+                Button(onClick = { takePhoto(AFTER,  takeAfter::launch)  }) { Text("Después") }
             }
 
-            // Miniaturas
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(o.photos) { ph ->
                     val bm = BitmapFactory.decodeFile(ph.path)
@@ -164,8 +163,7 @@ fun OrderDetailScreen(orderId: String) {
             }
 
             Divider()
-            // Aquí puedes mantener el resto de tu UI (servicios, piezas, totales, etc.)
-            Text("TOTAL sin IVA: ———  |  con IVA: ———") // placeholder
+            Text("TOTAL sin IVA: ———  |  con IVA: ———")
         }
     }
 }
