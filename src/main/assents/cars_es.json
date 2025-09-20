@@ -1,0 +1,17 @@
+[
+  { "brand": "SEAT", "model": "Ibiza", "year": 2018, "engineCode": "1.0 TSI 95", "imageDrawable": "seat_ibiza_2018" },
+  { "brand": "SEAT", "model": "León", "year": 2020, "engineCode": "1.5 TSI 130", "imageDrawable": "seat_leon_2020" },
+  { "brand": "Volkswagen", "model": "Golf", "year": 2016, "engineCode": "1.6 TDI 110", "imageDrawable": "volkswagen_golf_2016" },
+  { "brand": "Volkswagen", "model": "Polo", "year": 2019, "engineCode": "1.0 TSI 95", "imageDrawable": "volkswagen_polo_2019" },
+  { "brand": "Renault", "model": "Clio", "year": 2017, "engineCode": "1.5 dCi 90", "imageDrawable": "renault_clio_2017" },
+  { "brand": "Peugeot", "model": "208", "year": 2020, "engineCode": "1.2 PureTech 100", "imageDrawable": "peugeot_208_2020" },
+  { "brand": "Citroen", "model": "C3", "year": 2018, "engineCode": "1.2 PureTech 82", "imageDrawable": "citroen_c3_2018" },
+  { "brand": "Ford", "model": "Fiesta", "year": 2019, "engineCode": "1.0 EcoBoost 100", "imageDrawable": "ford_fiesta_2019" },
+  { "brand": "Opel", "model": "Corsa", "year": 2017, "engineCode": "1.4 90", "imageDrawable": "opel_corsa_2017" },
+  { "brand": "Toyota", "model": "Corolla", "year": 2020, "engineCode": "1.8 Hybrid", "imageDrawable": "toyota_corolla_2020" },
+  { "brand": "Hyundai", "model": "Tucson", "year": 2021, "engineCode": "1.6 T-GDi 150", "imageDrawable": "hyundai_tucson_2021" },
+  { "brand": "Kia", "model": "Sportage", "year": 2021, "engineCode": "1.6 T-GDi 150", "imageDrawable": "kia_sportage_2021" },
+  { "brand": "Nissan", "model": "Qashqai", "year": 2019, "engineCode": "1.3 DIG-T 140", "imageDrawable": "nissan_qashqai_2019" },
+  { "brand": "Dacia", "model": "Sandero", "year": 2021, "engineCode": "1.0 TCe 90", "imageDrawable": "dacia_sandero_2021" },
+  { "brand": "Audi", "model": "A3", "year": 2020, "engineCode": "35 TFSI", "imageDrawable": "audi_a3_2020" }
+]
