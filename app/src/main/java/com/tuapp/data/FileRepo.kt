@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.util.concurrent.atomic.AtomicLong
 
@@ -19,13 +20,18 @@ class FileRepo(private val ctx: Context) {
 
     @Synchronized
     fun load() {
-        if (file.exists()) {
-            runCatching { state = json.decodeFromString(file.readText()) }.onFailure { state = StorageState() }
-        } else state = StorageState()
+        state = if (file.exists()) {
+            runCatching { json.decodeFromString<StorageState>(file.readText()) }
+                .getOrElse { StorageState() }
+        } else {
+            StorageState()
+        }
     }
 
     @Synchronized
-    fun save() { file.writeText(json.encodeToString(state)) }
+    fun save() {
+        file.writeText(json.encodeToString(state))
+    }
 
     @Synchronized
     fun listOrders(): List<Order> = state.orders.sortedByDescending { it.id }
@@ -34,10 +40,17 @@ class FileRepo(private val ctx: Context) {
     fun newOrder(): Long {
         val id = seq.incrementAndGet()
         val cust = Customer(id = seq.incrementAndGet(), name = "Cliente Demo")
-        val veh = Vehicle(id = seq.incrementAndGet(), customerId = cust.id, brand = "Genérico", model = "Modelo", plate = "0000-XXX")
+        val veh = Vehicle(
+            id = seq.incrementAndGet(),
+            customerId = cust.id,
+            brand = "Genérico",
+            model = "Modelo",
+            plate = "0000-XXX"
+        )
         val o = Order(id = id, customer = cust, vehicle = veh)
         state = state.copy(orders = state.orders + o)
-        save(); return id
+        save()
+        return id
     }
 
     @Synchronized
@@ -46,77 +59,80 @@ class FileRepo(private val ctx: Context) {
     @Synchronized
     fun addService(orderId: Long, description: String, hours: Double, hourlyRate: Double) {
         val o = getOrder(orderId) ?: return
-        val s = o.services + ServiceItem(id = seq.incrementAndGet(), description, hours, hourlyRate)
+        val s = o.services + ServiceItem(
+            id = seq.incrementAndGet(),
+            description = description,
+            hours = hours,
+            hourlyRate = hourlyRate
+        )
         update(o.copy(services = s))
     }
 
     @Synchronized
     fun addPart(orderId: Long, code: String, description: String, qty: Int, unitPrice: Double, url: String?) {
         val o = getOrder(orderId) ?: return
-        val p = o.parts + PartItem(id = seq.incrementAndGet(), code, description, qty, unitPrice, url)
+        val p = o.parts + PartItem(
+            id = seq.incrementAndGet(),
+            code = code,
+            description = description,
+            qty = qty,
+            unitPrice = unitPrice,
+            url = url
+        )
         update(o.copy(parts = p))
     }
 
     @Synchronized
     fun updateRates(orderId: Long, vatPct: Double?, hourlyRate: Double?) {
         val o = getOrder(orderId) ?: return
-        update(o.copy(
-            vatPct = vatPct ?: o.vatPct,
-            baseHourlyRate = hourlyRate ?: o.baseHourlyRate
-        ))
+        update(
+            o.copy(
+                vatPct = vatPct ?: o.vatPct,
+                baseHourlyRate = hourlyRate ?: o.baseHourlyRate
+            )
+        )
     }
 
+    /**
+     * Crea una orden "rápida" desde líneas de presupuesto.
+     * lines = [ Triple(descripción, cantidad, precioMedioUnitario) ]
+     * El total por línea = cantidad * precioMedioUnitario (como servicio).
+     */
     @Synchronized
     fun newOrderFromLines(lines: List<Triple<String, Int, Double>>, vatPct: Double): Long {
         val id = seq.incrementAndGet()
         val cust = Customer(id = seq.incrementAndGet(), name = "Cliente Presupuesto")
-        val veh = Vehicle(id = seq.incrementAndGet(), customerId = cust.id, brand = "—", model = "—", plate = "—")
+        val veh = Vehicle(
+            id = seq.incrementAndGet(),
+            customerId = cust.id,
+            brand = "—",
+            model = "—",
+            plate = "—"
+        )
         val services = lines.map { (desc, qty, midPrice) ->
-            ServiceItem(id = seq.incrementAndGet(), description = desc, hours = 1.0, hourlyRate = (midPrice * qty).coerceAtLeast(0.0))
+            // Guardamos como "servicio" con horas=1 y tarifa = total de la línea
+            ServiceItem(
+                id = seq.incrementAndGet(),
+                description = desc,
+                hours = 1.0,
+                hourlyRate = (midPrice * qty).coerceAtLeast(0.0)
+            )
         }
-        val o = Order(id = id, customer = cust, vehicle = veh, services = services, parts = emptyList(), vatPct = vatPct, baseHourlyRate = 35.0)
+        val o = Order(
+            id = id,
+            customer = cust,
+            vehicle = veh,
+            services = services,
+            parts = emptyList(),
+            vatPct = vatPct,
+            baseHourlyRate = 35.0
+        )
         state = state.copy(orders = state.orders + o)
-        save(); return id
-    }
-
-    private fun update(n: Order) {
-        state = state.copy(orders = state.orders.map { if (it.id == n.id) n else it })
         save()
+        return id
     }
-}
 
-@kotlinx.serialization.Serializable
-private data class StorageState(val orders: List<Order> = emptyList())
-// Añadir foto a una orden
-@Synchronized
-fun addPhoto(orderId: Long, stage: PhotoStage, path: String) {
-    val o = getOrder(orderId) ?: return
-    val p = o.photos + PhotoRef(id = seq.incrementAndGet(), stage = stage, path = path)
-    update(o.copy(photos = p))
-}
-
-// Guardar ruta de firma
-@Synchronized
-fun saveSignature(orderId: Long, signaturePath: String) {
-    val o = getOrder(orderId) ?: return
-    update(o.copy(customerSignaturePath = signaturePath))
-}
-@Synchronized
-fun updateVehicle(
-    orderId: Long,
-    brand: String? = null,
-    model: String? = null,
-    year: Int? = null,
-    plate: String? = null,
-    engineCode: String? = null
-) {
-    val o = getOrder(orderId) ?: return
-    val v = o.vehicle.copy(
-        brand = brand ?: o.vehicle.brand,
-        model = model ?: o.vehicle.model,
-        year = year ?: o.vehicle.year,
-        plate = plate ?: o.vehicle.plate,
-        engineCode = engineCode ?: o.vehicle.engineCode
-    )
-    update(o.copy(vehicle = v))
-}
+    /** Añadir foto a una orden (Antes / En marcha / Después) */
+    @Synchronized
+    fun addPhoto(orderId: Long, stage: PhotoStage, path: String) {
+        val o = getOrder(orderId) ?: return
