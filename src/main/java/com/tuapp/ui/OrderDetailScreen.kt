@@ -63,7 +63,49 @@ fun OrderDetailScreen(orderId: String) {
 
             Text("Cliente: ${o.customer.name}")
             Text("Vehículo: ${o.vehicle.brand} ${o.vehicle.model} (${o.vehicle.plate})")
+// ---------- Selectores: Marca → Modelo → Año ----------
+Divider()
+Text("Selecciona vehículo", style = MaterialTheme.typography.titleMedium)
 
+// 1) MARCA
+BrandDropdown(currentBrand = o.vehicle.brand) { selectedBrand ->
+    // Al cambiar marca, vaciamos modelo/año/motor
+    repo.updateVehicle(id, brand = selectedBrand, model = "", year = null, engineCode = null)
+    order = repo.getOrder(id)
+}
+
+// 2) MODELO (filtrado por marca)
+ModelDropdown(
+    brand = order?.vehicle?.brand,
+    currentModel = order?.vehicle?.model
+) { selectedModel ->
+    // Al cambiar modelo, vaciamos año/motor
+    repo.updateVehicle(id, model = selectedModel, year = null, engineCode = null)
+    order = repo.getOrder(id)
+}
+
+// 3) AÑO (filtrado por marca+modelo)
+YearDropdown(
+    brand = order?.vehicle?.brand,
+    model = order?.vehicle?.model,
+    currentYear = order?.vehicle?.year
+) { selectedYear ->
+    // Al elegir año, buscamos el código de motor y lo guardamos
+    val code = com.tuapp.data.CarCatalog.engineCodeFor(
+        app,
+        brand = order?.vehicle?.brand ?: return@YearDropdown,
+        model = order?.vehicle?.model ?: return@YearDropdown,
+        year = selectedYear
+    )
+    repo.updateVehicle(id, year = selectedYear, engineCode = code)
+    order = repo.getOrder(id)
+}
+
+// Resumen visual de lo seleccionado
+val v = order!!.vehicle
+Text("Seleccionado: ${v.brand} ${v.model} ${v.year ?: ""}  ${v.engineCode?.let { "· Motor: $it" } ?: ""}")
+Divider()
+// ------------------------------------------------------
             Divider()
             Text("Fotos", style = MaterialTheme.typography.titleMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
