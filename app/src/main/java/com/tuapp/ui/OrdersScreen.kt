@@ -1,55 +1,129 @@
-package com.tuapp.ui
+package com.tuapp.data
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import android.content.Context
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
+import java.io.File
+import java.util.concurrent.atomic.AtomicLong
 
-// Modelo simple de referencia de precio
-data class PriceReference(
-    val job: String,
-    val priceRange: String
-)
+class FileRepo(private val ctx: Context) {
 
-// Datos de ejemplo
-val priceReferences = listOf(
-    PriceReference("Cambio de aceite", "50€ – 100€"),
-    PriceReference("Revisión básica", "80€ – 150€"),
-    PriceReference("Cambio de frenos (pastillas)", "120€ – 250€"),
-    PriceReference("Cambio de batería", "80€ – 180€"),
-    PriceReference("Instalación eléctrica mínima", "20€ – 50€"),
-    PriceReference("Instalación eléctrica media", "50€ – 100€"),
-    PriceReference("Instalación eléctrica completa", "100€ – 500€"),
-    PriceReference("Cambio de correa distribución", "400€ – 900€"),
-    PriceReference("Cambio de neumáticos (juego 4)", "250€ – 600€"),
-    PriceReference("Alineación y equilibrado", "50€ – 120€")
-)
+    private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
+    private val file: File get() = File(ctx.filesDir, "taller_data.json")
 
-@Composable
-fun PriceReferenceScreen() {
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Referencia de precios") }) }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            items(priceReferences) { ref ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    Column(Modifier.padding(16.dp)) {
-                        Text(ref.job, style = MaterialTheme.typography.titleMedium)
-                        Text(ref.priceRange, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            }
+    private var seq = AtomicLong(System.currentTimeMillis())
+    private var state = StorageState()
+
+    init { load() }
+
+    @Synchronized
+    fun load() {
+        state = if (file.exists()) {
+            runCatching { json.decodeFromString<StorageState>(file.readText()) }
+                .getOrElse { StorageState() }
+        } else StorageState()
+    }
+
+    @Synchronized fun save() { file.writeText(json.encodeToString(state)) }
+
+    @Synchronized fun listOrders(): List<Order> = state.orders.sortedByDescending { it.id }
+
+    @Synchronized
+    fun newOrder(): Long {
+        val id = seq.incrementAndGet()
+        val cust = Customer(id = seq.incrementAndGet(), name = "Cliente Demo")
+        val veh = Vehicle(
+            id = seq.incrementAndGet(),
+            customerId = cust.id,
+            brand = "Genérico",
+            model = "Modelo",
+            plate = "0000-XXX"
+        )
+        val o = Order(id = id, customer = cust, vehicle = veh)
+        state = state.copy(orders = state.orders + o)
+        save()
+        return id
+    }
+
+    @Synchronized fun getOrder(id: Long): Order? = state.orders.find { it.id == id }
+
+    @Synchronized
+    fun addService(orderId: Long, description: String, hours: Double, hourlyRate: Double) {
+        val o = getOrder(orderId) ?: return
+        val s = o.services + ServiceItem(seq.incrementAndGet(), description, hours, hourlyRate)
+        update(o.copy(services = s))
+    }
+
+    @Synchronized
+    fun addPart(orderId: Long, code: String, description: String, qty: Int, unitPrice: Double, url: String?) {
+        val o = getOrder(orderId) ?: return
+        val p = o.parts + PartItem(seq.incrementAndGet(), code, description, qty, unitPrice, url)
+        update(o.copy(parts = p))
+    }
+
+    @Synchronized
+    fun updateRates(orderId: Long, vatPct: Double?, hourlyRate: Double?) {
+        val o = getOrder(orderId) ?: return
+        update(o.copy(vatPct = vatPct ?: o.vatPct, baseHourlyRate = hourlyRate ?: o.baseHourlyRate))
+    }
+
+    @Synchronized
+    fun newOrderFromLines(lines: List<Triple<String, Int, Double>>, vatPct: Double): Long {
+        val id = seq.incrementAndGet()
+        val cust = Customer(id = seq.incrementAndGet(), name = "Cliente Presupuesto")
+        val veh = Vehicle(seq.incrementAndGet(), cust.id, "—", "—", "—")
+        val services = lines.map { (desc, qty, mid) ->
+            ServiceItem(seq.incrementAndGet(), desc, 1.0, (mid * qty).coerceAtLeast(0.0))
         }
+        val o = Order(id, cust, veh, services = services, vatPct = vatPct, baseHourlyRate = 35.0)
+        state = state.copy(orders = state.orders + o)
+        save()
+        return id
+    }
+
+    @Synchronized
+    fun addPhoto(orderId: Long, stage: PhotoStage, path: String) {
+        val o = getOrder(orderId) ?: return
+        val p = o.photos + PhotoRef(seq.incrementAndGet(), stage, path)
+        update(o.copy(photos = p))
+    }
+
+    @Synchronized
+    fun saveSignature(orderId: Long, signaturePath: String) {
+        val o = getOrder(orderId) ?: return
+        update(o.copy(customerSignaturePath = signaturePath))
+    }
+
+    @Synchronized
+    fun updateVehicle(
+        orderId: Long,
+        brand: String? = null,
+        model: String? = null,
+        year: Int? = null,
+        plate: String? = null,
+        engineCode: String? = null,
+        imagePath: String? = null
+    ) {
+        val o = getOrder(orderId) ?: return
+        val v = o.vehicle.copy(
+            brand = brand ?: o.vehicle.brand,
+            model = model ?: o.vehicle.model,
+            year = year ?: o.vehicle.year,
+            plate = plate ?: o.vehicle.plate,
+            engineCode = engineCode ?: o.vehicle.engineCode,
+            imagePath = imagePath ?: o.vehicle.imagePath
+        )
+        update(o.copy(vehicle = v))
+    }
+
+    @Synchronized
+    private fun update(n: Order) {
+        state = state.copy(orders = state.orders.map { if (it.id == n.id) n else it })
+        save()
     }
 }
+
+@Serializable
+private data class StorageState(val orders: List<Order> = emptyList())
