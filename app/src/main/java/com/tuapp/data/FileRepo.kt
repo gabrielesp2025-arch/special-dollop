@@ -101,3 +101,22 @@ fun saveSignature(orderId: Long, signaturePath: String) {
     val o = getOrder(orderId) ?: return
     update(o.copy(customerSignaturePath = signaturePath))
 }
+@Synchronized
+fun updateVehicle(
+    orderId: Long,
+    brand: String? = null,
+    model: String? = null,
+    year: Int? = null,
+    plate: String? = null,
+    engineCode: String? = null
+) {
+    val o = getOrder(orderId) ?: return
+    val v = o.vehicle.copy(
+        brand = brand ?: o.vehicle.brand,
+        model = model ?: o.vehicle.model,
+        year = year ?: o.vehicle.year,
+        plate = plate ?: o.vehicle.plate,
+        engineCode = engineCode ?: o.vehicle.engineCode
+    )
+    update(o.copy(vehicle = v))
+}
