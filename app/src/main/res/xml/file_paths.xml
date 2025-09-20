@@ -6,3 +6,4 @@
     <!-- (Opcional) si alguna vez exportas a almacenamiento externo -->
     <external-path name="ext" path="."/>
 </paths>
+./gradlew clean assembleDebug
