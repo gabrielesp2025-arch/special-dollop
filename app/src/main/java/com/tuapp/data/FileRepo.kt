@@ -87,3 +87,17 @@ class FileRepo(private val ctx: Context) {
 
 @kotlinx.serialization.Serializable
 private data class StorageState(val orders: List<Order> = emptyList())
+// Añadir foto a una orden
+@Synchronized
+fun addPhoto(orderId: Long, stage: PhotoStage, path: String) {
+    val o = getOrder(orderId) ?: return
+    val p = o.photos + PhotoRef(id = seq.incrementAndGet(), stage = stage, path = path)
+    update(o.copy(photos = p))
+}
+
+// Guardar ruta de firma
+@Synchronized
+fun saveSignature(orderId: Long, signaturePath: String) {
+    val o = getOrder(orderId) ?: return
+    update(o.copy(customerSignaturePath = signaturePath))
+}
