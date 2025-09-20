@@ -7,9 +7,6 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.util.concurrent.atomic.AtomicLong
 
-/**
- * Almacena todo en un JSON local: /data/data/<app>/files/taller_data.json
- */
 class FileRepo(private val ctx: Context) {
 
     private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
@@ -18,9 +15,7 @@ class FileRepo(private val ctx: Context) {
     private var seq = AtomicLong(System.currentTimeMillis())
     private var state = StorageState()
 
-    init {
-        load()
-    }
+    init { load() }
 
     @Synchronized
     fun load() {
@@ -30,11 +25,8 @@ class FileRepo(private val ctx: Context) {
     }
 
     @Synchronized
-    fun save() {
-        file.writeText(json.encodeToString(state))
-    }
+    fun save() { file.writeText(json.encodeToString(state)) }
 
-    // ---- Órdenes ----
     @Synchronized
     fun listOrders(): List<Order> = state.orders.sortedByDescending { it.id }
 
@@ -45,8 +37,7 @@ class FileRepo(private val ctx: Context) {
         val veh = Vehicle(id = seq.incrementAndGet(), customerId = cust.id, brand = "Genérico", model = "Modelo", plate = "0000-XXX")
         val o = Order(id = id, customer = cust, vehicle = veh)
         state = state.copy(orders = state.orders + o)
-        save()
-        return id
+        save(); return id
     }
 
     @Synchronized
@@ -55,14 +46,14 @@ class FileRepo(private val ctx: Context) {
     @Synchronized
     fun addService(orderId: Long, description: String, hours: Double, hourlyRate: Double) {
         val o = getOrder(orderId) ?: return
-        val s = o.services + ServiceItem(id = seq.incrementAndGet(), description = description, hours = hours, hourlyRate = hourlyRate)
+        val s = o.services + ServiceItem(id = seq.incrementAndGet(), description, hours, hourlyRate)
         update(o.copy(services = s))
     }
 
     @Synchronized
     fun addPart(orderId: Long, code: String, description: String, qty: Int, unitPrice: Double, url: String?) {
         val o = getOrder(orderId) ?: return
-        val p = o.parts + PartItem(id = seq.incrementAndGet(), code = code, description = description, qty = qty, unitPrice = unitPrice, supplierUrl = url)
+        val p = o.parts + PartItem(id = seq.incrementAndGet(), code, description, qty, unitPrice, url)
         update(o.copy(parts = p))
     }
 
@@ -75,40 +66,17 @@ class FileRepo(private val ctx: Context) {
         ))
     }
 
-    /**
-     * Crea una Orden a partir de líneas del tarifario.
-     * Cada línea se convierte en un Servicio con 1h y precio = (precioMedio * cantidad).
-     * @param lines lista de Triple(descripcion, cantidad, precioMedioEUR)
-     * @param vatPct IVA a aplicar en la orden (por ejemplo 21.0)
-     * @return id de la nueva orden
-     */
     @Synchronized
     fun newOrderFromLines(lines: List<Triple<String, Int, Double>>, vatPct: Double): Long {
         val id = seq.incrementAndGet()
         val cust = Customer(id = seq.incrementAndGet(), name = "Cliente Presupuesto")
         val veh = Vehicle(id = seq.incrementAndGet(), customerId = cust.id, brand = "—", model = "—", plate = "—")
-
         val services = lines.map { (desc, qty, midPrice) ->
-            ServiceItem(
-                id = seq.incrementAndGet(),
-                description = desc,
-                hours = 1.0,
-                hourlyRate = (midPrice * qty).coerceAtLeast(0.0)
-            )
+            ServiceItem(id = seq.incrementAndGet(), description = desc, hours = 1.0, hourlyRate = (midPrice * qty).coerceAtLeast(0.0))
         }
-
-        val o = Order(
-            id = id,
-            customer = cust,
-            vehicle = veh,
-            services = services,
-            parts = emptyList(),
-            vatPct = vatPct,
-            baseHourlyRate = 35.0
-        )
+        val o = Order(id = id, customer = cust, vehicle = veh, services = services, parts = emptyList(), vatPct = vatPct, baseHourlyRate = 35.0)
         state = state.copy(orders = state.orders + o)
-        save()
-        return id
+        save(); return id
     }
 
     private fun update(n: Order) {
