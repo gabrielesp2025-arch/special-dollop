@@ -1,5 +1,8 @@
 package com.tuapp.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import android.app.Application
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -28,7 +31,32 @@ fun OrderDetailScreen(orderId: String) {
     val repo = remember { FileRepo(app) }
     val id = orderId.toLongOrNull() ?: repo.listOrders().firstOrNull()?.id ?: return
     var order by remember { mutableStateOf(repo.getOrder(id)) }
+// Imagen del vehículo (si existe un drawable con ese nombre)
+val v = order!!.vehicle
 
+// Busca el id del recurso en res/drawable/ basado en marca+modelo+año
+val resId = com.tuapp.data.carImageResId(
+    app,
+    brand = v.brand,
+    model = v.model,
+    year = v.year
+)
+
+if (resId != 0) {
+    // Si existe, se muestra la imagen
+    Image(
+        painter = painterResource(resId),
+        contentDescription = "Imagen ${v.brand} ${v.model} ${v.year ?: ""}",
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .padding(top = 8.dp),
+        contentScale = ContentScale.Fit
+    )
+} else {
+    // Si no existe el drawable, mostramos un texto
+    Text("Sin imagen disponible para ${v.brand} ${v.model} ${v.year ?: ""}")
+}
     // ---------- CÁMARA: preparación ----------
     var pendingPhotoFile by remember { mutableStateOf<File?>(null) }
 
