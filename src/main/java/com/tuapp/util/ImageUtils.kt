@@ -10,7 +10,7 @@ import java.util.*
 fun createImageFile(context: Context, prefix: String = "IMG"): File {
     val time = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
     val name = "${prefix}_$time.jpg"
-    return File(context.filesDir, name) // se guarda dentro de la app
+    return File(context.filesDir, name) // guarda dentro de la app
 }
 
 fun uriForFile(context: Context, file: File): Uri =
