@@ -18,6 +18,7 @@ data class Vehicle(
     val model: String,
     val plate: String,
     val year: Int? = null,
+    val engineCode: String? = null, // 👈 NUEVO: código de motor
     val vin: String? = null
 )
 
@@ -40,6 +41,16 @@ data class PartItem(
 )
 
 @Serializable
+enum class PhotoStage { BEFORE, DURING, AFTER } // 👈 fotos por etapa
+
+@Serializable
+data class PhotoRef(
+    val id: Long = 0,
+    val stage: PhotoStage,
+    val path: String // ruta interna (app files)
+)
+
+@Serializable
 data class Order(
     val id: Long = 0,
     val customer: Customer,
@@ -47,7 +58,9 @@ data class Order(
     val vatPct: Double = 21.0,
     val baseHourlyRate: Double = 35.0,
     val services: List<ServiceItem> = emptyList(),
-    val parts: List<PartItem> = emptyList()
+    val parts: List<PartItem> = emptyList(),
+    val photos: List<PhotoRef> = emptyList(),      // 👈 NUEVO
+    val customerSignaturePath: String? = null      // 👈 NUEVO
 ) {
     val subtotalServices: Double get() = services.sumOf { it.hours * it.hourlyRate }
     val subtotalParts: Double get() = parts.sumOf { it.qty * it.unitPrice }
