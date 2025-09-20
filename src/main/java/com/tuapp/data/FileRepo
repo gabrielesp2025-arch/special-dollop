@@ -1,6 +1,19 @@
 @Synchronized
-fun addPhoto(orderId: Long, stage: PhotoStage, path: String) {
+fun updateVehicle(
+    orderId: Long,
+    brand: String? = null,
+    model: String? = null,
+    year: Int? = null,
+    plate: String? = null,
+    engineCode: String? = null
+) {
     val o = getOrder(orderId) ?: return
-    val p = o.photos + PhotoRef(id = seq.incrementAndGet(), stage = stage, path = path)
-    update(o.copy(photos = p))
+    val v = o.vehicle.copy(
+        brand = brand ?: o.vehicle.brand,
+        model = model ?: o.vehicle.model,
+        year = year ?: o.vehicle.year,
+        plate = plate ?: o.vehicle.plate,
+        engineCode = engineCode ?: o.vehicle.engineCode
+    )
+    update(o.copy(vehicle = v))
 }
