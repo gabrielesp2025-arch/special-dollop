@@ -19,7 +19,7 @@ fun NavRoot() {
             )
         }
         composable("order/{id}") {
-            // Placeholder temporal SIN padding ni dp
+            // Placeholder sin padding/Modifier/dp
             OrderDetailScreen_Placeholder(onBack = { nav.popBackStack() })
         }
         composable("prices") {
@@ -34,7 +34,7 @@ fun NavRoot() {
     }
 }
 
-/** Placeholder temporal para que compile. */
+/** Placeholder temporal muy simple para que compile. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OrderDetailScreen_Placeholder(onBack: () -> Unit) {
@@ -46,6 +46,6 @@ private fun OrderDetailScreen_Placeholder(onBack: () -> Unit) {
             )
         }
     ) { _ ->
-        Text("Pantalla detalle (placeholder). Luego reemplazamos por la versión completa.")
+        Text("Pantalla detalle (placeholder)")
     }
 }
