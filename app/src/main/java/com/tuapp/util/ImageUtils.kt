@@ -16,3 +16,6 @@ fun createImageFile(context: Context, prefix: String = "IMG"): File {
 
 fun uriForFile(context: Context, file: File): Uri =
     FileProvider.getUriForFile(context, "com.tuapp.fileprovider", file)
+fun createImageFile(context: Context, prefix: String = "IMG"): File { ... }
+fun uriForFile(context: Context, file: File): Uri =
+    FileProvider.getUriForFile(context, "com.tuapp.fileprovider", file)
