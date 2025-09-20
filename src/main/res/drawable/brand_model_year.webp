@@ -1,10 +1,126 @@
-seat_ibiza_2018.webp
-seat_leon_2020.webp
-volkswagen_golf_2016.webp
-volkswagen_polo_2019.webp
-renault_clio_2017.webp
-renault_megane_2018.webp
-peugeot_208_2020.webp
-citroen_c3_2018.webp
-ford_fiesta_2019.webp
-opel_corsa_2017.webp
+brand,model,year,drawable_name
+SEAT,Ibiza,2018,seat_ibiza_2018.webp
+SEAT,León,2020,seat_leon_2020.webp
+SEAT,Arona,2019,seat_arona_2019.webp
+SEAT,Ateca,2021,seat_ateca_2021.webp
+SEAT,Tarraco,2020,seat_tarraco_2020.webp
+Volkswagen,Golf,2016,volkswagen_golf_2016.webp
+Volkswagen,Polo,2019,volkswagen_polo_2019.webp
+Volkswagen,Tiguan,2020,volkswagen_tiguan_2020.webp
+Volkswagen,T-Roc,2021,volkswagen_t_roc_2021.webp
+Volkswagen,T-Cross,2020,volkswagen_t_cross_2020.webp
+Renault,Clio,2017,renault_clio_2017.webp
+Renault,Captur,2019,renault_captur_2019.webp
+Renault,Mégane,2018,renault_megane_2018.webp
+Renault,Kadjar,2019,renault_kadjar_2019.webp
+Renault,Arkana,2021,renault_arkana_2021.webp
+Peugeot,208,2020,peugeot_208_2020.webp
+Peugeot,2008,2020,peugeot_2008_2020.webp
+Peugeot,308,2019,peugeot_308_2019.webp
+Peugeot,3008,2020,peugeot_3008_2020.webp
+Peugeot,5008,2019,peugeot_5008_2019.webp
+Citroën,C3,2018,citroen_c3_2018.webp
+Citroën,C4,2021,citroen_c4_2021.webp
+Citroën,C5 Aircross,2019,citroen_c5_aircross_2019.webp
+Citroën,Berlingo,2018,citroen_berlingo_2018.webp
+Citroën,C3 Aircross,2019,citroen_c3_aircross_2019.webp
+Ford,Fiesta,2019,ford_fiesta_2019.webp
+Ford,Focus,2018,ford_focus_2018.webp
+Ford,Puma,2020,ford_puma_2020.webp
+Ford,Kuga,2020,ford_kuga_2020.webp
+Ford,Mondeo,2018,ford_mondeo_2018.webp
+Opel,Corsa,2017,opel_corsa_2017.webp
+Opel,Astra,2018,opel_astra_2018.webp
+Opel,Crossland,2020,opel_crossland_2020.webp
+Opel,Grandland,2020,opel_grandland_2020.webp
+Opel,Mokka,2021,opel_mokka_2021.webp
+Toyota,Corolla,2020,toyota_corolla_2020.webp
+Toyota,Yaris,2019,toyota_yaris_2019.webp
+Toyota,C-HR,2020,toyota_c_hr_2020.webp
+Toyota,RAV4,2020,toyota_rav4_2020.webp
+Toyota,Aygo,2018,toyota_aygo_2018.webp
+Hyundai,Tucson,2021,hyundai_tucson_2021.webp
+Hyundai,Kona,2020,hyundai_kona_2020.webp
+Hyundai,i20,2019,hyundai_i20_2019.webp
+Hyundai,i30,2018,hyundai_i30_2018.webp
+Hyundai,Bayun,2021,hyundai_bayun_2021.webp
+Kia,Sportage,2021,kia_sportage_2021.webp
+Kia,Stonic,2020,kia_stonic_2020.webp
+Kia,Ceed,2019,kia_ceed_2019.webp
+Kia,Picanto,2018,kia_picanto_2018.webp
+Kia,Niro,2020,kia_niro_2020.webp
+Nissan,Qashqai,2019,nissan_qashqai_2019.webp
+Nissan,Juke,2020,nissan_juke_2020.webp
+Nissan,Micra,2018,nissan_micra_2018.webp
+Nissan,X-Trail,2018,nissan_x_trail_2018.webp
+Nissan,Leaf,2019,nissan_leaf_2019.webp
+Dacia,Sandero,2021,dacia_sandero_2021.webp
+Dacia,Duster,2020,dacia_duster_2020.webp
+Dacia,Logan,2019,dacia_logan_2019.webp
+Dacia,Jogger,2022,dacia_jogger_2022.webp
+Dacia,Spring,2021,dacia_spring_2021.webp
+BMW,Serie 1,2019,bmw_serie_1_2019.webp
+BMW,Serie 3,2018,bmw_serie_3_2018.webp
+BMW,X1,2020,bmw_x1_2020.webp
+BMW,X3,2021,bmw_x3_2021.webp
+BMW,Serie 2 Gran Coupé,2020,bmw_serie_2_gran_coupe_2020.webp
+Mercedes-Benz,Clase A,2019,mercedes_benz_clase_a_2019.webp
+Mercedes-Benz,Clase C,2018,mercedes_benz_clase_c_2018.webp
+Mercedes-Benz,GLA,2020,mercedes_benz_gla_2020.webp
+Mercedes-Benz,GLC,2020,mercedes_benz_glc_2020.webp
+Mercedes-Benz,Clase B,2019,mercedes_benz_clase_b_2019.webp
+Audi,A3,2020,audi_a3_2020.webp
+Audi,A4,2018,audi_a4_2018.webp
+Audi,Q3,2019,audi_q3_2019.webp
+Audi,Q5,2020,audi_q5_2020.webp
+Audi,A1,2019,audi_a1_2019.webp
+Škoda,Octavia,2019,skoda_octavia_2019.webp
+Škoda,Fabia,2018,skoda_fabia_2018.webp
+Škoda,Karoq,2020,skoda_karoq_2020.webp
+Škoda,Kodiaq,2020,skoda_kodiaq_2020.webp
+Škoda,Scala,2019,skoda_scala_2019.webp
+Fiat,500,2018,fiat_500_2018.webp
+Fiat,Panda,2019,fiat_panda_2019.webp
+Fiat,Tipo,2018,fiat_tipo_2018.webp
+Fiat,500X,2019,fiat_500x_2019.webp
+Fiat,500e,2021,fiat_500e_2021.webp
+Volvo,XC40,2020,volvo_xc40_2020.webp
+Volvo,S60,2019,volvo_s60_2019.webp
+Volvo,V60,2019,volvo_v60_2019.webp
+Volvo,XC60,2020,volvo_xc60_2020.webp
+Volvo,C40,2022,volvo_c40_2022.webp
+Mazda,Mazda3,2019,mazda_mazda3_2019.webp
+Mazda,CX-30,2020,mazda_cx_30_2020.webp
+Mazda,CX-5,2019,mazda_cx_5_2019.webp
+Mazda,MX-5,2018,mazda_mx_5_2018.webp
+Mazda,Mazda2,2018,mazda_mazda2_2018.webp
+Honda,Civic,2018,honda_civic_2018.webp
+Honda,CR-V,2019,honda_cr_v_2019.webp
+Honda,HR-V,2019,honda_hr_v_2019.webp
+Honda,Jazz,2020,honda_jazz_2020.webp
+Honda,CR-V Hybrid,2021,honda_cr_v_hybrid_2021.webp
+Mitsubishi,ASX,2019,mitsubishi_asx_2019.webp
+Mitsubishi,Outlander,2020,mitsubishi_outlander_2020.webp
+Mitsubishi,Eclipse Cross,2020,mitsubishi_eclipse_cross_2020.webp
+Suzuki,Swift,2019,suzuki_swift_2019.webp
+Suzuki,Vitara,2019,suzuki_vitara_2019.webp
+MINI,Cooper 3p,2018,mini_cooper_3p_2018.webp
+MINI,Countryman,2019,mini_countryman_2019.webp
+Alfa Romeo,Giulia,2018,alfa_romeo_giulia_2018.webp
+Alfa Romeo,Stelvio,2019,alfa_romeo_stelvio_2019.webp
+Cupra,Formentor,2021,cupra_formentor_2021.webp
+Cupra,Ateca,2019,cupra_ateca_2019.webp
+Tesla,Model 3,2021,tesla_model_3_2021.webp
+Tesla,Model Y,2022,tesla_model_y_2022.webp
+Jeep,Renegade,2019,jeep_renegade_2019.webp
+Jeep,Compass,2020,jeep_compass_2020.webp
+Land Rover,Discovery Sport,2019,land_rover_discovery_sport_2019.webp
+Land Rover,Range Rover Evoque,2020,land_rover_range_rover_evoque_2020.webp
+DS,DS 3 Crossback,2020,ds_ds_3_crossback_2020.webp
+DS,DS 7 Crossback,2019,ds_ds_7_crossback_2019.webp
+Lexus,UX,2019,lexus_ux_2019.webp
+Lexus,NX,2021,lexus_nx_2021.webp
+Smart,ForTwo,2018,smart_fortwo_2018.webp
+Smart,ForFour,2018,smart_forfour_2018.webp
+MG,ZS,2020,mg_zs_2020.webp
+MG,4 Electric,2022,mg_4_electric_2022.webp
