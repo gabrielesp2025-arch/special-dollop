@@ -10,24 +10,12 @@ import androidx.navigation.compose.rememberNavController
 fun NavRoot() {
     val nav = rememberNavController()
     NavHost(navController = nav, startDestination = "orders") {
-        composable("orders") {
-            OrdersScreen(
-                onNewOrder = { id -> nav.navigate("order/$id") },
-                onOpen = { id -> nav.navigate("order/$id") },
-                onOpenPrices = { nav.navigate("prices") }
-            )
-        }
-        composable("order/{id}") {
-            Text("Detalle de orden (placeholder)")
-        }
-        composable("prices") {
-            PriceReferenceScreen(
-                onBack = { nav.popBackStack() },
-                onCreateFromPrices = { newOrderId ->
-                    nav.popBackStack()
-                    nav.navigate("order/$newOrderId")
-                }
-            )
-        }
+        composable("orders") { OrdersScreen(
+            onNewOrder = { id -> nav.navigate("order/$id") },
+            onOpen = { id -> nav.navigate("order/$id") },
+            onOpenPrices = { nav.navigate("prices") }
+        ) }
+        composable("order/{id}") { Text("Detalle de orden (placeholder)") }
+        composable("prices") { PriceReferenceScreen(onBack = { nav.popBackStack() }, onCreateFromPrices = { id -> nav.navigate("order/$id") }) }
     }
 }
