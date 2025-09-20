@@ -1,0 +1,6 @@
+@Synchronized
+fun addPhoto(orderId: Long, stage: PhotoStage, path: String) {
+    val o = getOrder(orderId) ?: return
+    val p = o.photos + PhotoRef(id = seq.incrementAndGet(), stage = stage, path = path)
+    update(o.copy(photos = p))
+}
