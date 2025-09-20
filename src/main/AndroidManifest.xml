@@ -15,7 +15,7 @@
             </intent-filter>
         </activity>
 
-        <!-- FileProvider para compartir ficheros internos (fotos/PDF) -->
+        <!-- 👇 NECESARIO para fotos/PDF -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.tuapp.fileprovider"
