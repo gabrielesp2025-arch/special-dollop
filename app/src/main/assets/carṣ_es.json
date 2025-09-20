@@ -1,0 +1,10 @@
+[
+  {"brand":"SEAT","model":"Ibiza","year":2018,"engineCode":"CJZB"},
+  {"brand":"SEAT","model":"León","year":2017,"engineCode":"CRKB"},
+  {"brand":"Volkswagen","model":"Golf","year":2016,"engineCode":"CXSA"},
+  {"brand":"Renault","model":"Clio","year":2019,"engineCode":"H4Bt"},
+  {"brand":"Peugeot","model":"308","year":2018,"engineCode":"EB2"},
+  {"brand":"Citroën","model":"C3","year":2018,"engineCode":"EB2F"},
+  {"brand":"Ford","model":"Focus","year":2017,"engineCode":"HFDA"},
+  {"brand":"Opel","model":"Corsa","year":2019,"engineCode":"B12XEL"}
+]
