@@ -1,6 +1,6 @@
 package com.tuapp.ui
 
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,7 +19,8 @@ fun NavRoot() {
             )
         }
         composable("order/{id}") {
-            OrderDetailScreen(onBack = { nav.popBackStack() })
+            // 👇 Usamos un placeholder interno para evitar el error
+            OrderDetailScreen_Placeholder(onBack = { nav.popBackStack() })
         }
         composable("prices") {
             PriceReferenceScreen(
@@ -30,5 +31,24 @@ fun NavRoot() {
                 }
             )
         }
+    }
+}
+
+/** Placeholder temporal para que compile. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OrderDetailScreen_Placeholder(onBack: () -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Detalle de orden") },
+                navigationIcon = { TextButton(onClick = onBack) { Text("Volver") } }
+            )
+        }
+    ) { p ->
+        Text(
+            "Pantalla detalle (placeholder). Luego reemplazamos por la versión completa.",
+            modifier = androidx.compose.ui.Modifier.padding(p).padding(16.dp)
+        )
     }
 }
