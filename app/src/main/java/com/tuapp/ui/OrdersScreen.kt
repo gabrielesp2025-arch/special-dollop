@@ -102,4 +102,65 @@ fun PriceReferenceScreen(
             // Bloque IVA + resumen
             Card {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedTextField(
+                            value = ivaText,
+                            onValueChange = { ivaText = it },
+                            label = { Text("IVA %") },
+                            modifier = Modifier.width(120.dp)
+                        )
+                        Text("Seleccionadas: ${items.count { it.selected }} líneas", style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Divider()
+                    Text("Total sin IVA: €${"%.2f".format(minTotal)} – €${"%.2f".format(maxTotal)}")
+                    Text("Total con IVA (${String.format("%.1f", ivaPct)}%): €${"%.2f".format(minConIva)} – €${"%.2f".format(maxConIva)}",
+                        style = MaterialTheme.typography.titleMedium)
+                }
+            }
+
+            // Lista de conceptos
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(items) { it ->
+                    Card {
+                        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("${it.category} · ${it.name}", style = MaterialTheme.typography.titleMedium)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                OutlinedTextField(
+                                    value = it.minEUR.toString(),
+                                    onValueChange = { v -> it.minEUR = v.toDoubleOrNull() ?: it.minEUR },
+                                    label = { Text("€ mínimo") },
+                                    modifier = Modifier.width(120.dp)
+                                )
+                                OutlinedTextField(
+                                    value = it.maxEUR.toString(),
+                                    onValueChange = { v -> it.maxEUR = v.toDoubleOrNull() ?: it.maxEUR },
+                                    label = { Text("€ máximo") },
+                                    modifier = Modifier.width(120.dp)
+                                )
+                                OutlinedTextField(
+                                    value = it.qty.toString(),
+                                    onValueChange = { v -> it.qty = (v.toIntOrNull() ?: it.qty).coerceAtLeast(1) },
+                                    label = { Text("Cantidad") },
+                                    modifier = Modifier.width(120.dp)
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                val selected = it.selected
+                                val toggleText = if (selected) "Quitar del presupuesto" else "Añadir al presupuesto"
+                                Button(onClick = {
+                                    it.selected = !selected
+                                    items = items.toList()
+                                }) { Text(toggleText) }
+
+                                val q = max(1, it.qty)
+                                val lineMin = it.minEUR * q
+                                val lineMax = it.maxEUR * q
+                                Text("Línea: €${"%.2f".format(lineMin)} – €${"%.2f".format(lineMax)}")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
