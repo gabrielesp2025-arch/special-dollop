@@ -26,6 +26,16 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderDetailScreen(orderId: String) {
+val app = LocalContext.current.applicationContext as Application
+val repo = remember { FileRepo(app) }
+
+// id de la orden que estés usando en esta pantalla:
+val id = orderId.toLongOrNull() ?: repo.listOrders().firstOrNull()?.id ?: return
+
+var order by remember { mutableStateOf(repo.getOrder(id)) }
+
+}
+    ----------
     val app = LocalContext.current.applicationContext as Application
     val repo = remember { FileRepo(app) }
     val id = orderId.toLongOrNull() ?: repo.listOrders().firstOrNull()?.id ?: return
