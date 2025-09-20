@@ -19,7 +19,7 @@ fun NavRoot() {
         }
         composable("order/{id}") {
             // Placeholder sin padding/dp/Modifier
-            OrderDetailScreen_Min(onBack = { nav.popBackStack() })
+            Text("Detalle (placeholder)")
         }
         composable("prices") {
             PriceReferenceScreen(
@@ -31,9 +31,4 @@ fun NavRoot() {
             )
         }
     }
-}
-
-@Composable
-private fun OrderDetailScreen_Min(onBack: () -> Unit) {
-    Text("Pantalla detalle (placeholder)")
 }
