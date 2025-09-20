@@ -22,7 +22,13 @@ fun NavRoot() {
             OrderDetailScreen(onBack = { nav.popBackStack() })
         }
         composable("prices") {
-            PriceReferenceScreen(onBack = { nav.popBackStack() })
+            PriceReferenceScreen(
+                onBack = { nav.popBackStack() },
+                onCreateFromPrices = { newOrderId ->
+                    nav.popBackStack()          // salir del tarifario
+                    nav.navigate("order/$newOrderId") // abrir la nueva OT
+                }
+            )
         }
     }
 }
